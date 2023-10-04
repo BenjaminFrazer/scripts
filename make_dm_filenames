@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+echo what ID should I start at?
+read startnum
+echo what ID should I end at?
+read n
+for I in $(seq $startnum $n)
+do
+    echo "T150_DM_PSU_TEST_LOG_$I"
+    cp T150_DM_PSU_TEST_LOG_XXX.xlsx "T150_DM_PSU_TEST_LOG_$I.xlsx"
+done

@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+putty -load "motherboard_rs232"
+# putty -serial -sercfg "57600 8 1 Nn"
