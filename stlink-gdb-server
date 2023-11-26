@@ -1,0 +1,23 @@
+#!/bin/bash
+gdbServerRelPath="/plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.1.0.202305091550/tools/bin/ST-LINK_gdbserver"
+gdbProgrammerRelPath="/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.1.0.202305091550/tools/bin/STM32_Programmer_CLI"
+cubeIdeSymlinkPath=$(which stm32cubeide_1.13.2)
+cubeIdePath=$(realpath "${cubeIdeSymlinkPath}")
+cubeIdeFolder=${cubeIdePath%/*} # strip the exe of the end
+fullStLinkServerPath="${cubeIdeFolder}""${gdbServerRelPath}"
+fullStLinkProgPath="${cubeIdeFolder}""${gdbProgrammerRelPath}"
+configPath=~/.stm32cubeide/config.txt
+if [ ! -f "${configPath}" ]; then
+    echo "Config.txt not found under: ${configPath}"
+fi
+if [ ! -f "${fullStLinkServerPath}" ]; then
+    echo "STlink Server not found under: ${fullStLinkServerPath}"
+fi
+if [ ! -f "${fullStLinkProgPath}" ]; then
+    echo "ST link Programmer not found under: ${fullStLinkProgPath}"
+fi
+# echo cube IDE folder path: "${cubeIdePath}"
+# echo cube GDB server path: "${fullStLinkServerPath}"
+# echo cube programmer path: "${fullStLinkProgPath}"
+$fullStLinkServerPath -c "${configPath}" -cp "${fullStLinkProgPath%/*}" # -f "$PWD/stlink-server.log"
+# /opt/st/stm32cubeide_1.13.2/stm32cubeide  #
