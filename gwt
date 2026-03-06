@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Get the root of the current git repo
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || {
+    echo "Error: not inside a git repository"
+    exit 1
+}
+
+repo_name=$(basename "$repo_root")
+parent_dir=$(dirname "$repo_root")
+
+if [[ $# -eq 1 ]]; then
+    branch="$1"
+else
+    echo "Usage: $(basename "$0") <branch>"
+    echo ""
+    echo "Creates a worktree at ${parent_dir}/${repo_name}-<branch>"
+    exit 1
+fi
+
+dir_name="${branch//\//-}"
+worktree_dir="${parent_dir}/${repo_name}-${dir_name}"
+
+if [[ -d "$worktree_dir" ]]; then
+    echo "Error: directory already exists: $worktree_dir"
+    exit 1
+fi
+
+# Create worktree — use existing branch if it exists, otherwise create a new one
+if git show-ref --verify --quiet "refs/heads/${branch}" 2>/dev/null; then
+    git worktree add "$worktree_dir" "$branch"
+else
+    git worktree add "$worktree_dir" -b "$branch"
+fi
+
+# Clone submodules if the repo uses them
+if [[ -f "${worktree_dir}/.gitmodules" ]]; then
+    echo "Initialising submodules..."
+    git -C "$worktree_dir" submodule update --init --recursive
+fi
+
+echo ""
+echo "Worktree ready: $worktree_dir"
