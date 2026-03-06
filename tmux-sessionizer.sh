@@ -30,7 +30,22 @@ if [[ -z $selected ]]; then
     exit 0
 fi
 
-selected_name=$(basename "$selected" | tr . _)
+# Build session name from git repo context to avoid collisions
+git_root=$(git -C "$selected" rev-parse --show-toplevel 2>/dev/null)
+if [[ -n "$git_root" ]]; then
+    repo_parent=$(basename "$(dirname "$git_root")")
+    repo_name=$(basename "$git_root")
+    rel_path="${selected#"$git_root"}"
+    rel_path="${rel_path#/}"
+    if [[ -n "$rel_path" ]]; then
+        selected_name="${repo_parent}/${repo_name}/${rel_path}"
+    else
+        selected_name="${repo_parent}/${repo_name}"
+    fi
+else
+    selected_name=$(basename "$selected")
+fi
+selected_name=$(echo "$selected_name" | tr '.:' '_')
 tmux_running=$(pgrep tmux)
 
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
